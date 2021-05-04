@@ -1,6 +1,8 @@
 import { useState, useEffect, useLayoutEffect } from 'react';
 import { ReactiveVar } from '../../core';
 
+const useIsomorphicEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
 export function useReactiveVar<T>(rv: ReactiveVar<T>): T {
   const value = rv();
   // We don't actually care what useState thinks the value of the variable
@@ -9,7 +11,7 @@ export function useReactiveVar<T>(rv: ReactiveVar<T>): T {
   // We subscribe to variable updates on initial mount and when the value has
   // changed. This avoids a subtle bug in React.StrictMode where multiple listeners
   // are added, leading to inconsistent updates.
-  useLayoutEffect(() => rv.onNextChange(setValue), [value]);
+  useIsomorphicEffect(() => rv.onNextChange(setValue), [value]);
   // Once the component is unmounted, ignore future updates. Note that the
   // above useEffect function returns a mute function without calling it,
   // allowing it to be called when the component unmounts. This is
